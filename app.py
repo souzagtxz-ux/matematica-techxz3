@@ -1,77 +1,86 @@
 import streamlit as st
 import requests
 
-# Configuração da página (Estilo App de Celular)
-st.set_page_config(page_title="Matemática Tech", page_icon="➕", layout="centered")
+# 1. Configuração que remove margens bobas
+st.set_page_config(page_title="Math Tech", page_icon="➕", layout="centered")
 
-# CSS para deixar o visual preto e verde neon, idêntico ao seu projeto original
+# 2. O "Pulo do Gato": CSS para esconder o que é feio e deixar visual de App
 st.markdown("""
     <style>
-    .stApp { background-color: #000000; }
-    h1 { color: #00FF99; text-align: center; font-family: sans-serif; }
-    .stTextInput>div>div>input {
-        background-color: #1a1a1a; color: white; border: 1px solid #00FF99; border-radius: 10px;
-    }
+    /* Esconde barra do GitHub, Menu e Rodapé */
+    header {visibility: hidden;}
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    
+    /* Remove espaços vazios e define fundo preto real */
+    .block-container {padding-top: 0rem; padding-bottom: 0rem;}
+    .stApp {background-color: #000000;}
+    
+    /* Estilo dos Botões do Souza (Neon e Arredondado) */
     div.stButton > button {
-        width: 100%; border-radius: 15px; height: 80px; 
-        background-color: #1a1a1a; color: #00FF99; border: 2px solid #00FF99;
-        font-weight: bold; font-size: 18px; transition: 0.3s;
+        width: 100%; 
+        border-radius: 15px; 
+        height: 70px; 
+        background-color: #111111; 
+        color: #00FF99; 
+        border: 2px solid #00FF99;
+        font-weight: bold; 
+        font-size: 16px;
+        margin-bottom: -10px;
     }
-    div.stButton > button:hover { background-color: #00FF99; color: black; }
-    .stMarkdown { color: white; }
+    
+    /* Estilo da Caixa de Texto */
+    .stTextInput>div>div>input {
+        background-color: #1a1a1a; 
+        color: white; 
+        border: 1px solid #00FF99;
+        text-align: center;
+    }
+    
+    /* Ajuste de cor dos textos e mensagens */
+    .stMarkdown, p, span { color: white !important; }
     </style>
     """, unsafe_allow_html=True)
 
-st.markdown("<h1>➕ MATEMÁTICA TECH</h1>", unsafe_allow_html=True)
+# Título Principal
+st.markdown("<h1 style='text-align: center; color: white;'>➕ MATEMÁTICA<br><span style='color: #00FF99;'>TECH</span></h1>", unsafe_allow_html=True)
 
 # Campo de entrada
-pergunta = st.text_input("", placeholder="Digite sua dúvida matemática aqui...")
+pergunta = st.text_input("", placeholder="Digite sua dúvida aqui...")
 
-# Função de conexão com a IA Groq (Usando sua chave)
-def perguntar_ia(prompt_sistema, texto_usuario):
+# Função da IA
+def chamar_ia(prompt_sistema, texto):
     url = "https://api.groq.com/openai/v1/chat/completions"
-    headers = {
-        "Authorization": "Bearer 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",
-        "Content-Type": "application/json"
-    }
-    payload = {
-        "messages": [
-            {"role": "system", "content": prompt_sistema},
-            {"role": "user", "content": texto_usuario}
-        ],
+    headers = {"Authorization": "Bearer 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"}
+    data = {
+        "messages": [{"role": "system", "content": prompt_sistema}, {"role": "user", "content": texto}],
         "model": "llama-3.1-8b-instant"
     }
     try:
-        response = requests.post(url, headers=headers, json=payload)
-        return response.json()['choices'][0]['message']['content']
+        r = requests.post(url, headers=headers, json=data)
+        return r.json()['choices'][0]['message']['content']
     except:
-        return "Erro de conexão ⚠️ Tente novamente."
+        return "Erro de conexão ⚠️"
 
-# Layout de Botões (2 colunas como no seu Kivy)
+# 3. Organização em Colunas (Para não ficar "paia" no celular)
 col1, col2 = st.columns(2)
 
 with col1:
     if st.button("👨‍🏫\nPROFESSOR"):
         if pergunta:
-            with st.spinner('Analisando...'):
-                res = perguntar_ia("Aja como um professor 👨‍🏫. Explique detalhadamente.", pergunta)
-                st.info(res)
-    
+            st.info(chamar_ia("Explique como um professor legal.", pergunta))
+
     if st.button("📸\nCÂMERA"):
         if pergunta:
-            with st.spinner('Escaneando...'):
-                res = perguntar_ia("Aja como um scanner de imagem técnico 📸.", pergunta)
-                st.info(res)
+            st.info(chamar_ia("Simule um scan de imagem técnica.", pergunta))
 
 with col2:
     if st.button("📖\nDIRETO"):
         if pergunta:
-            with st.spinner('Calculando...'):
-                res = perguntar_ia("Responda apenas o resultado final 📖.", pergunta)
-                st.success(res)
-            
+            st.success(chamar_ia("Dê apenas a resposta direta.", pergunta))
+
     if st.button("♻️\nRESETAR"):
         st.rerun()
 
-st.markdown("---")
-st.caption("MATH TECH v1.0 | DESENVOLVIDO POR SOUZA")
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.caption("DESENVOLVIDO POR SOUZA")
